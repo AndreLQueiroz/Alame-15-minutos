@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contador de 15 minutos</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    #clock {
+      font-size: 6rem;
+      font-weight: bold;
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 20px 60px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #00ffc3;
+      margin-bottom: 30px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+    }
+
+    button {
+      background-color: #00ffc3;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #000;
+      font-weight: bold;
+    }
+
+    button:focus {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+    }
+
+    button:hover {
+      background-color: #00cfa1;
+    }
+  </style>
+</head>
+<body>
+  <main role="main" aria-labelledby="titulo">
+    <h1 id="titulo">Alarme de 15 minutos</h1>
+
+    <div id="clock" role="timer" aria-live="polite" aria-label="Relógio regressivo">15:00</div>
+    
+    <section class="buttons" aria-label="Controles de tempo">
+      <button onclick="startCountdown()" aria-label="Iniciar contagem de 15 minutos">Iniciar Contagem</button>
+      <button onclick="stopCountdown()" aria-label="Parar contagem atual">Parar Contagem</button>
+    </section>
+  </main>
+
+  <script>
+    let interval;
+    let timeLeft = 15 * 60; // 15 minutos em segundos
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    }
+
+    function updateDisplay() {
+      document.getElementById('clock').textContent = formatTime(timeLeft);
+    }
+
+    function startCountdown() {
+      clearInterval(interval);
+      timeLeft = 15 * 60;
+      updateDisplay();
+
+      interval = setInterval(() => {
+        timeLeft--;
+        updateDisplay();
+
+        if (timeLeft < 0) {
+          clearInterval(interval);
+          document.getElementById('clock').textContent = "00:00";
+          announce("Tempo esgotado!");
+        }
+      }, 1000);
+    }
+
+    function stopCountdown() {
+      clearInterval(interval);
+      announce("Contagem parada.");
+    }
+
+    // Para leitores de tela anunciarem alertas
+    function announce(message) {
+      const liveRegion = document.getElementById('live-region');
+      liveRegion.textContent = '';
+      setTimeout(() => {
+        liveRegion.textContent = message;
+      }, 100);
+    }
+
+    // Exibir tempo inicial
+    updateDisplay();
+  </script>
+
+  <!-- Região invisível para alertas acessíveis -->
+  <div id="live-region" aria-live="assertive" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;"></div>
+</body>
+</html>
