@@ -54,14 +54,36 @@
     button:hover {
       background-color: #00cfa1;
     }
+
+    .volume-control {
+      margin-top: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .volume-control input[type="range"] {
+      width: 150px;
+      accent-color: #00ffc3;
+    }
+
+    .volume-control span {
+      font-size: 1.5rem;
+    }
   </style>
 </head>
 <body>
   <h1>Alarme de 15 minutos</h1>
   <div id="clock">--:--:--</div>
+
   <div class="buttons">
     <button onclick="startClock()">Iniciar Contagem</button>
     <button onclick="stopClock()">Parar Contagem</button>
+  </div>
+
+  <div class="volume-control">
+    <span id="volumeIcon">🔊</span>
+    <input type="range" id="volumeControl" min="0" max="100" value="100" />
   </div>
 
   <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
@@ -69,6 +91,11 @@
   <script>
     let clockInterval;
     let lastAlarmMinute = null;
+
+    const clockEl = document.getElementById("clock");
+    const alarm = document.getElementById("alarmSound");
+    const volumeSlider = document.getElementById("volumeControl");
+    const volumeIcon = document.getElementById("volumeIcon");
 
     function updateClock() {
       const now = new Date();
@@ -80,23 +107,22 @@
         hour12: false
       };
       const timeString = new Intl.DateTimeFormat('pt-PT', options).format(now);
-      document.getElementById("clock").textContent = timeString;
+      clockEl.textContent = timeString;
 
       const [hour, minute, second] = timeString.split(':').map(Number);
 
-      // Alarme exato em 00, 15, 30, 45 no segundo 0
       if (minute % 15 === 0 && second === 0) {
-        const currentMinuteKey = `${hour}:${minute}`;
-        if (lastAlarmMinute !== currentMinuteKey) {
-          document.getElementById('alarmSound').play();
-          lastAlarmMinute = currentMinuteKey;
+        const currentMark = `${hour}:${minute}`;
+        if (lastAlarmMinute !== currentMark) {
+          alarm.play();
+          lastAlarmMinute = currentMark;
         }
       }
     }
 
     function startClock() {
       if (!clockInterval) {
-        updateClock(); // inicial imediato
+        updateClock();
         clockInterval = setInterval(updateClock, 1000);
       }
     }
@@ -105,6 +131,23 @@
       clearInterval(clockInterval);
       clockInterval = null;
     }
+
+    // Controle de volume
+    volumeSlider.addEventListener("input", () => {
+      const volume = volumeSlider.value / 100;
+      alarm.volume = volume;
+
+      if (volume === 0) {
+        volumeIcon.textContent = "🔇";
+      } else if (volume < 0.5) {
+        volumeIcon.textContent = "🔈";
+      } else {
+        volumeIcon.textContent = "🔊";
+      }
+    });
+
+    // Inicializa volume no 100%
+    alarm.volume = 1;
   </script>
 </body>
 </html>
